@@ -8,10 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "db:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/database.types.ts",
+    "db:types": "supabase gen types --lang=typescript --linked --schema public > src/types/database.types.ts",
     "db:push": "supabase db push",
-    "db:reset": "supabase db reset",
-    "db:seed": "supabase db seed"
+    "db:push:seed": "supabase db push --include-seed"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.91.0",
