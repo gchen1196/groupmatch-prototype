@@ -254,3 +254,8 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
+// Convenience types
+export type Group = Database['public']['Tables']['groups']['Row'];
+export type Swipe = Database['public']['Tables']['swipes']['Row'];
+export type Match = Database['public']['Tables']['matches']['Row'];

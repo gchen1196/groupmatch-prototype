@@ -1,64 +1,46 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { Group, Match } from '../types/database.types';
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Match } from '../types/database.types';
 import { groupService } from '../services/groupService';
 import { matchService } from '../services/matchService';
 
-interface UseDiscoveryReturn {
-  groups: Group[];
-  currentGroup: Group | null;
-  isLoading: boolean;
-  error: string | null;
-  newMatch: Match | null;
-  swipe: (isLike: boolean) => Promise<void>;
-  dismissMatch: () => void;
-}
-
-export function useDiscovery(currentGroupId: string): UseDiscoveryReturn {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function useDiscovery(currentGroupId: string) {
+  const queryClient = useQueryClient();
   const [newMatch, setNewMatch] = useState<Match | null>(null);
 
-  const loadGroups = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await groupService.getDiscoverableGroups(currentGroupId);
-      setGroups(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load groups');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentGroupId]);
+  const {
+    data: groups = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['discoverable-groups', currentGroupId],
+    queryFn: () => groupService.getDiscoverableGroups(currentGroupId),
+  });
 
-  useEffect(() => {
-    loadGroups();
-  }, [loadGroups]);
+  const swipeMutation = useMutation({
+    mutationFn: ({ receiverId, isLike }: { receiverId: string; isLike: boolean }) =>
+      matchService.recordSwipe(currentGroupId, receiverId, isLike),
+    onSuccess: (match) => {
+      if (match) {
+        setNewMatch(match);
+        // Invalidate matches query so it refetches
+        queryClient.invalidateQueries({ queryKey: ['matches', currentGroupId] });
+      }
+      // Remove swiped group from cache
+      queryClient.setQueryData(
+        ['discoverable-groups', currentGroupId],
+        (old: typeof groups) => old?.slice(1) ?? []
+      );
+    },
+  });
 
   const swipe = useCallback(
     async (isLike: boolean) => {
       const currentGroup = groups[0];
       if (!currentGroup) return;
-
-      try {
-        const match = await matchService.recordSwipe(
-          currentGroupId,
-          currentGroup.id,
-          isLike
-        );
-
-        if (match) {
-          setNewMatch(match);
-        }
-
-        // Remove swiped group from stack
-        setGroups((prev) => prev.slice(1));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to record swipe');
-      }
+      await swipeMutation.mutateAsync({ receiverId: currentGroup.id, isLike });
     },
-    [groups, currentGroupId]
+    [groups, swipeMutation]
   );
 
   const dismissMatch = useCallback(() => {
@@ -69,7 +51,7 @@ export function useDiscovery(currentGroupId: string): UseDiscoveryReturn {
     groups,
     currentGroup: groups[0] || null,
     isLoading,
-    error,
+    error: error instanceof Error ? error.message : null,
     newMatch,
     swipe,
     dismissMatch,

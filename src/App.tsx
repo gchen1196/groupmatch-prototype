@@ -1,4 +1,6 @@
+import { QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
+import { queryClient } from './lib/queryClient';
 import { DiscoverPage } from './pages/DiscoverPage';
 import { MatchesPage } from './pages/MatchesPage';
 import './App.css';
@@ -8,31 +10,33 @@ const CURRENT_GROUP_ID = '11111111-1111-1111-1111-111111111111';
 
 function App() {
   return (
-    <BrowserRouter>
-      <div className="app">
-        <nav className="app__nav">
-          <NavLink to="/" end className="app__nav-link">
-            Discover
-          </NavLink>
-          <NavLink to="/matches" className="app__nav-link">
-            Matches
-          </NavLink>
-        </nav>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <div className="app">
+          <nav className="app__nav">
+            <NavLink to="/" end className="app__nav-link">
+              Discover
+            </NavLink>
+            <NavLink to="/matches" className="app__nav-link">
+              Matches
+            </NavLink>
+          </nav>
 
-        <main className="app__main">
-          <Routes>
-            <Route
-              path="/"
-              element={<DiscoverPage currentGroupId={CURRENT_GROUP_ID} />}
-            />
-            <Route
-              path="/matches"
-              element={<MatchesPage currentGroupId={CURRENT_GROUP_ID} />}
-            />
-          </Routes>
-        </main>
-      </div>
-    </BrowserRouter>
+          <main className="app__main">
+            <Routes>
+              <Route
+                path="/"
+                element={<DiscoverPage currentGroupId={CURRENT_GROUP_ID} />}
+              />
+              <Route
+                path="/matches"
+                element={<MatchesPage currentGroupId={CURRENT_GROUP_ID} />}
+              />
+            </Routes>
+          </main>
+        </div>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

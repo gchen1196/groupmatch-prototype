@@ -10,10 +10,12 @@
     "preview": "vite preview",
     "db:types": "supabase gen types --lang=typescript --linked --schema public > src/types/database.types.ts",
     "db:push": "supabase db push",
-    "db:push:seed": "supabase db push --include-seed"
+    "db:push:seed": "supabase db push --include-seed",
+    "db:reset": "supabase db reset --linked"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.91.0",
+    "@tanstack/react-query": "^5.90.19",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.12.0"
