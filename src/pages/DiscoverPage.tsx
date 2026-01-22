@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useDiscovery } from '../hooks/useDiscovery';
 import { GroupCard } from '../components/GroupCard';
 import { SwipeButtons } from '../components/SwipeButtons';
@@ -10,6 +11,9 @@ interface DiscoverPageProps {
 export function DiscoverPage({ currentGroupId }: DiscoverPageProps) {
   const { currentGroup, isLoading, error, newMatch, swipe, dismissMatch } =
     useDiscovery(currentGroupId);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(
+    null
+  );
 
   if (isLoading) {
     return (
@@ -33,10 +37,16 @@ export function DiscoverPage({ currentGroupId }: DiscoverPageProps) {
 
       {currentGroup ? (
         <>
-          <GroupCard group={currentGroup} />
+          <GroupCard
+            group={currentGroup}
+            onSwipeLeft={() => swipe(false)}
+            onSwipeRight={() => swipe(true)}
+            onSwipeDirectionChange={setSwipeDirection}
+          />
           <SwipeButtons
             onPass={() => swipe(false)}
             onLike={() => swipe(true)}
+            highlightDirection={swipeDirection}
           />
         </>
       ) : (
