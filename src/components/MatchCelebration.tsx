@@ -1,4 +1,5 @@
-import './MatchCelebration.css';
+import { Button } from './ui/button';
+import { Card, CardContent } from './ui/card';
 
 interface MatchCelebrationProps {
   onDismiss: () => void;
@@ -6,17 +7,22 @@ interface MatchCelebrationProps {
 
 export function MatchCelebration({ onDismiss }: MatchCelebrationProps) {
   return (
-    <div className="match-celebration" onClick={onDismiss}>
-      <div className="match-celebration__content">
-        <div className="match-celebration__emoji">🎉</div>
-        <h1 className="match-celebration__title">It's a Match!</h1>
-        <p className="match-celebration__subtitle">
-          You both liked each other!
-        </p>
-        <button className="match-celebration__btn" onClick={onDismiss}>
-          Keep Swiping
-        </button>
-      </div>
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      onClick={onDismiss}
+    >
+      <Card className="text-center p-8 animate-in zoom-in-95 duration-300">
+        <CardContent className="p-0">
+          <div className="text-6xl mb-4">🎉</div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            It's a Match!
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            You both liked each other!
+          </p>
+          <Button onClick={onDismiss}>Keep Swiping</Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

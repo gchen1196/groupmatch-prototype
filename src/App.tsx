@@ -1,36 +1,40 @@
+import { useState } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { queryClient } from './lib/queryClient';
+import { Header } from './components/Header';
 import { DiscoverPage } from './pages/DiscoverPage';
 import { MatchesPage } from './pages/MatchesPage';
-import './App.css';
-
-// Mocked current user group (as per PRD: prototype uses mocked session)
-const CURRENT_GROUP_ID = '11111111-1111-1111-1111-111111111111';
+import { TEST_GROUPS } from './data/testGroups';
 
 function App() {
+  const [currentGroupId, setCurrentGroupId] = useState(TEST_GROUPS[0].id);
+
+  const handleGroupChange = (value: string) => {
+    setCurrentGroupId(value);
+    // Clear cached queries when switching groups
+    queryClient.clear();
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className="app">
-          <nav className="app__nav">
-            <NavLink to="/" end className="app__nav-link">
-              Discover
-            </NavLink>
-            <NavLink to="/matches" className="app__nav-link">
-              Matches
-            </NavLink>
-          </nav>
+        <div className="min-h-screen bg-secondary/50">
+          <Header
+            groups={TEST_GROUPS}
+            currentGroupId={currentGroupId}
+            onGroupChange={handleGroupChange}
+          />
 
-          <main className="app__main">
+          <main>
             <Routes>
               <Route
                 path="/"
-                element={<DiscoverPage currentGroupId={CURRENT_GROUP_ID} />}
+                element={<DiscoverPage currentGroupId={currentGroupId} />}
               />
               <Route
                 path="/matches"
-                element={<MatchesPage currentGroupId={CURRENT_GROUP_ID} />}
+                element={<MatchesPage currentGroupId={currentGroupId} />}
               />
             </Routes>
           </main>

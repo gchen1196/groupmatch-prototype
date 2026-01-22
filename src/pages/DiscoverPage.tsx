@@ -2,7 +2,6 @@ import { useDiscovery } from '../hooks/useDiscovery';
 import { GroupCard } from '../components/GroupCard';
 import { SwipeButtons } from '../components/SwipeButtons';
 import { MatchCelebration } from '../components/MatchCelebration';
-import './DiscoverPage.css';
 
 interface DiscoverPageProps {
   currentGroupId: string;
@@ -14,22 +13,22 @@ export function DiscoverPage({ currentGroupId }: DiscoverPageProps) {
 
   if (isLoading) {
     return (
-      <div className="discover-page">
-        <div className="discover-page__loading">Loading groups...</div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
+        <div className="text-muted-foreground">Loading groups...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="discover-page">
-        <div className="discover-page__error">{error}</div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
+        <div className="text-destructive">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="discover-page">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
       {newMatch && <MatchCelebration onDismiss={dismissMatch} />}
 
       {currentGroup ? (
@@ -41,7 +40,7 @@ export function DiscoverPage({ currentGroupId }: DiscoverPageProps) {
           />
         </>
       ) : (
-        <div className="discover-page__empty">
+        <div className="text-center text-muted-foreground">
           <p>No more groups to discover!</p>
           <p>Check back later for new groups.</p>
         </div>

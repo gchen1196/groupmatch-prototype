@@ -1,5 +1,6 @@
 import type { Group } from '../types/database.types';
-import './GroupCard.css';
+import { getDefaultAvatarUrl } from '../lib/avatar';
+import { Card, CardContent } from './ui/card';
 
 interface GroupCardProps {
   group: Group;
@@ -7,17 +8,21 @@ interface GroupCardProps {
 
 export function GroupCard({ group }: GroupCardProps) {
   return (
-    <div className="group-card">
+    <Card className="w-full max-w-sm overflow-hidden">
       <img
-        src={group.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${group.id}`}
+        src={group.avatar_url || getDefaultAvatarUrl(group.id)}
         alt={group.name}
-        className="group-card__avatar"
+        className="w-full h-48 object-cover"
       />
-      <div className="group-card__content">
-        <h2 className="group-card__name">{group.name}</h2>
-        <span className="group-card__members">{group.member_count} members</span>
-        <p className="group-card__bio">{group.bio}</p>
-      </div>
-    </div>
+      <CardContent className="p-4">
+        <h2 className="text-xl font-semibold text-foreground">{group.name}</h2>
+        <span className="text-sm text-muted-foreground">
+          {group.member_count} members
+        </span>
+        <p className="mt-2 text-sm text-muted-foreground line-clamp-3 min-h-15">
+          {group.bio}
+        </p>
+      </CardContent>
+    </Card>
   );
 }
