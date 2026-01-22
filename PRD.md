@@ -176,11 +176,69 @@ The following are explicitly excluded from this prototype:
 
 ---
 
-## 8. Future Considerations
+## 8. Security (Future)
+
+### Current State (Prototype)
+
+- RLS enabled with permissive "allow all" policies
+- No authentication - group selector simulates session
+- Suitable for testing only
+
+### Future State (Production)
+
+When user authentication is added, implement Row Level Security (RLS) based on group membership:
+
+#### Required Schema Addition
+
+```sql
+-- Link users to groups
+CREATE TABLE group_members (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('admin', 'member')),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, group_id)
+);
+```
+
+#### RLS Policies
+
+```sql
+-- Helper function: Get user's group IDs
+CREATE FUNCTION user_group_ids() RETURNS SETOF UUID AS $$
+  SELECT group_id FROM group_members WHERE user_id = auth.uid()
+$$ LANGUAGE SQL SECURITY DEFINER;
+
+-- Groups: Anyone can view, only members can modify
+CREATE POLICY "Anyone can view groups"
+  ON groups FOR SELECT USING (true);
+
+CREATE POLICY "Members can update their group"
+  ON groups FOR UPDATE USING (id IN (SELECT user_group_ids()));
+
+-- Swipes: Only see/create swipes for your groups
+CREATE POLICY "View own group swipes"
+  ON swipes FOR SELECT USING (swiper_id IN (SELECT user_group_ids()));
+
+CREATE POLICY "Create swipes for own group"
+  ON swipes FOR INSERT WITH CHECK (swiper_id IN (SELECT user_group_ids()));
+
+-- Matches: Only see matches involving your groups
+CREATE POLICY "View own group matches"
+  ON matches FOR SELECT USING (
+    group_one_id IN (SELECT user_group_ids()) OR
+    group_two_id IN (SELECT user_group_ids())
+  );
+```
+
+---
+
+## 9. Future Considerations
 
 Features to consider for post-prototype:
 
-- Real user authentication
+- Real user authentication (Supabase Auth)
 - Group creation and management
 - In-app messaging after match
 - Location-based discovery
